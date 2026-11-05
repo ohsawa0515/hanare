@@ -72,4 +72,24 @@ struct VisibilityControllerTests {
         controller.restoreAll()
         #expect(controller.hiddenItems.count == 1)
     }
+
+    @Test func dropsTargetsAFailedHideLeftVisible() {
+        let backend = FakeBackend(values: [shown: .bool(true)])
+        backend.failWrites = true
+        let controller = VisibilityController(backends: [backend], store: makeStore())
+
+        #expect(controller.hide([shown]).isEmpty)
+        #expect(controller.hiddenItems.isEmpty)
+    }
+
+    @Test func hidesAgainWhenAJournaledTargetIsVisible() {
+        let backend = FakeBackend(values: [shown: .bool(true)])
+        let controller = VisibilityController(backends: [backend], store: makeStore())
+        controller.hide([shown])
+        backend.values[shown] = .bool(true)  // shown again behind Hanare's back
+
+        #expect(controller.hide([shown]) == [shown])
+        #expect(backend.values[shown] == .bool(false))
+        #expect(controller.hiddenItems == [HiddenItem(target: shown, previous: .bool(true))])
+    }
 }

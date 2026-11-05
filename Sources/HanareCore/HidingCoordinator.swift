@@ -89,14 +89,16 @@ public final class HidingCoordinator {
         state = .expanded
         revealTimer = Timer.scheduledTimer(withTimeInterval: Timing.revealInterval, repeats: true) { [weak self] timer in
             MainActor.assumeIsolated {
-                guard let self, !queue.isEmpty else {
-                    self?.revealTimer?.invalidate()
+                guard let self else { return }
+                guard !queue.isEmpty else {
+                    // The hide-again delay counts from when the last icon is back.
+                    self.revealTimer?.invalidate()
+                    self.scheduleAutoCollapse()
                     return
                 }
                 self.visibility.restore(queue.removeFirst())
             }
         }
-        scheduleAutoCollapse()
     }
 
     /// Shows every hidden icon and stops hiding until the user collapses again.

@@ -47,33 +47,45 @@ public final class VisibilityController {
 
     /// Hides the given targets, ordered from the one nearest to Hanare's icon.
     /// Returns the targets that were actually hidden.
+    ///
+    /// A target that is already in the hidden list but whose icon is visible again (e.g. an earlier
+    /// write failed) is hidden again, keeping the value recorded first.
     @discardableResult
     public func hide(_ targets: [HideTarget]) -> [HideTarget] {
-        let alreadyHidden = Set(hiddenItems.map(\.target))
+        let journaled = Set(hiddenItems.map(\.target))
         var newItems: [HiddenItem] = []
-        for target in targets where !alreadyHidden.contains(target) {
+        var toWrite: [HideTarget] = []
+        for target in targets {
             guard let backend = backend(for: target),
                   let current = backend.currentValue(of: target),
                   backend.isVisible(current) else {
-                logger.info("Skipping \(String(describing: target), privacy: .public)")
+                if !journaled.contains(target) { logger.info("Skipping \(String(describing: target), privacy: .public)") }
                 continue
             }
-            newItems.append(HiddenItem(target: target, previous: current))
+            if !journaled.contains(target) {
+                newItems.append(HiddenItem(target: target, previous: current))
+            }
+            toWrite.append(target)
         }
-        guard !newItems.isEmpty else { return [] }
+        guard !toWrite.isEmpty else { return [] }
 
+        // The journal is saved before writing so a crash mid-write can still be undone.
         hiddenItems += newItems
         store.save(hiddenItems)
         var hidden: [HideTarget] = []
         for (index, backend) in backends.enumerated() {
-            let targets = newItems.map(\.target).filter(backend.handles)
-            guard !targets.isEmpty else { continue }
-            if backend.hide(targets) {
-                hidden += targets
+            let batch = toWrite.filter(backend.handles)
+            guard !batch.isEmpty else { continue }
+            if backend.hide(batch) {
+                hidden += batch
             } else {
                 logger.error("Failed to hide with backend #\(index)")
+                // Targets the failed write left visible were not hidden, so they need no restoring.
+                let stillVisible = Set(batch.filter(isVisible))
+                hiddenItems.removeAll { stillVisible.contains($0.target) }
             }
         }
+        store.save(hiddenItems)
         return hidden
     }
 

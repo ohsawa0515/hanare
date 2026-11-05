@@ -15,6 +15,14 @@ struct AppEntry: Identifiable {
 /// Apps listed in System Settings > Menu Bar, read from the same setting Hanare changes.
 @MainActor
 enum AppCatalog {
+    /// What the list depends on: the tracked apps and which of them run. Cheap to compare, so the
+    /// list can be rebuilt only when it changes.
+    static func fingerprint() -> [String]? {
+        guard let bundleIDs = AppVisibilityBackend()?.trackedBundleIDs() else { return nil }
+        let running = Set(NSWorkspace.shared.runningApplications.compactMap(\.bundleIdentifier))
+        return bundleIDs.sorted().map { running.contains($0) ? "\($0)+" : $0 }
+    }
+
     /// Running apps first, then the rest by name. `nil` if macOS denies access to the setting.
     static func load() -> [AppEntry]? {
         guard let bundleIDs = AppVisibilityBackend()?.trackedBundleIDs() else { return nil }

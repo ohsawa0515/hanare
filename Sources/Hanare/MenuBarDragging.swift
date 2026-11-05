@@ -145,15 +145,22 @@ final class MenuBarDragging {
         isMoving = true
         let savedCursor = CGEvent(source: nil)?.location ?? .zero
         for target in targets where coordinator.isVisible(target) && !coordinator.currentlyHidden.contains(target) {
-            await move(target, to: hidden ? .left : .right)
+            // An app can have several icons. Drag them one at a time, stopping once none are left
+            // on the wrong side or a drag did not reduce their number.
+            var remaining = Int.max
+            while let count = await move(target, to: hidden ? .left : .right), count < remaining {
+                remaining = count
+            }
         }
         CGWarpMouseCursorPosition(savedCursor)
         isMoving = false
     }
 
-    private func move(_ target: HideTarget, to side: MenuBarSide) async {
+    /// Drags the icon of `target` nearest to the archer over to `side`. Returns how many of its
+    /// icons were on the other side before the drag, or `nil` if there were none.
+    private func move(_ target: HideTarget, to side: MenuBarSide) async -> Int? {
         let items = inspector.snapshots()
-        guard let toggle = items.first(where: { $0.pid == ownPID })?.frame else { return }
+        guard let toggle = items.first(where: { $0.pid == ownPID })?.frame else { return nil }
         let onOtherSide = items.filter {
             $0.pid != ownPID && MenuBarLayout.target(for: $0) == target && abs($0.frame.minY - toggle.minY) < 10
                 && (side == .left ? $0.frame.midX > toggle.midX : $0.frame.midX < toggle.midX)
@@ -162,12 +169,13 @@ final class MenuBarDragging {
         let icon = side == .left
             ? onOtherSide.min(by: { $0.frame.minX < $1.frame.minX })
             : onOtherSide.max(by: { $0.frame.minX < $1.frame.minX })
-        guard let icon else { return }
+        guard let icon else { return nil }
         await commandDrag(
             from: CGPoint(x: icon.frame.midX, y: icon.frame.midY),
             to: CGPoint(x: side == .left ? toggle.minX + 3 : toggle.maxX - 3, y: toggle.midY)
         )
         try? await Task.sleep(for: Const.moveSettleDelay)
+        return onOtherSide.count
     }
 
     private func commandDrag(from start: CGPoint, to end: CGPoint) async {

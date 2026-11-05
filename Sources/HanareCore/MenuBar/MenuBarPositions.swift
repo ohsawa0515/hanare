@@ -11,8 +11,13 @@ public struct MenuBarPositions: Equatable, Sendable {
     /// Hanare's own key, e.g. `status:Hanare::Hanare.toggle`.
     public let ownKey: String
 
-    public init?(entries: [String: Double], ownAutosaveName: String) {
-        guard let ownKey = entries.keys.first(where: { $0.hasSuffix("::" + ownAutosaveName) }) else { return nil }
+    /// `ownIdentities` are the names macOS may file Hanare's item under (its bundle ID and process
+    /// name). An exact match wins over an entry that only shares the autosave name, which can be
+    /// left behind by another build.
+    public init?(entries: [String: Double], ownAutosaveName: String, ownIdentities: [String] = []) {
+        let suffix = "::" + ownAutosaveName
+        let exact = ownIdentities.map { "status:\($0)\(suffix)" }.first { entries[$0] != nil }
+        guard let ownKey = exact ?? entries.keys.filter({ $0.hasSuffix(suffix) }).sorted().first else { return nil }
         self.entries = entries
         self.ownKey = ownKey
     }
@@ -129,7 +134,8 @@ public struct MenuBarPositionStore {
     public func read() -> MenuBarPositions? {
         guard let raw = preferences.value(forKey: Self.key) as? [String: Any] else { return nil }
         let entries = raw.compactMapValues { ($0 as? NSNumber)?.doubleValue }
-        return MenuBarPositions(entries: entries, ownAutosaveName: ownAutosaveName)
+        let identities = [Bundle.main.bundleIdentifier, ProcessInfo.processInfo.processName].compactMap { $0 }
+        return MenuBarPositions(entries: entries, ownAutosaveName: ownAutosaveName, ownIdentities: identities)
     }
 
     @discardableResult

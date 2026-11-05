@@ -16,6 +16,12 @@ struct MenuBarPositionsTests {
         #expect(MenuBarPositions.target(forKey: "status:PickProbe::PickProbe.item") == nil)
     }
 
+    @Test func prefersTheExactOwnKey() {
+        let entries = ["status:Hanare::Hanare.toggle": 100.0, "status:io.example.Hanare::Hanare.toggle": 300]
+        let table = MenuBarPositions(entries: entries, ownAutosaveName: "Hanare.toggle", ownIdentities: ["io.example.Hanare", "Hanare"])
+        #expect(table?.ownKey == "status:io.example.Hanare::Hanare.toggle")
+    }
+
     @Test func requiresOwnItem() {
         #expect(MenuBarPositions(entries: ["module:WiFi": 10], ownAutosaveName: "Hanare.toggle") == nil)
     }

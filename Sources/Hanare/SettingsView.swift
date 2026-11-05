@@ -14,6 +14,8 @@ struct SettingsView: View {
     let actions: SettingsActions
 
     @State private var apps = AppCatalog.load()
+    @State private var catalogFingerprint = AppCatalog.fingerprint()
+    @State private var hasAccess = ProtectedFileAccess.hasAccess
     @State private var isTrusted = MenuBarInspector.isTrusted(prompt: false)
     /// Icons being moved next to the archer, shown as chosen (`pendingHidden`) in the meantime.
     @State private var pending: Set<HideTarget> = []
@@ -56,8 +58,24 @@ struct SettingsView: View {
             } header: {
                 Text("System", bundle: ResourceBundle.bundle)
             }
+            // A change in progress finishes before the next one starts, so a later choice is never
+            // overwritten by an earlier one that completes after it.
+            .disabled(!pending.isEmpty)
 
             Section {
+                if !hasAccess {
+                    LabeledContent {
+                        Button {
+                            ProtectedFileAccess.request()
+                            refresh()
+                        } label: {
+                            Text("Allow Access…", bundle: ResourceBundle.bundle)
+                        }
+                    } label: {
+                        Text("Menu Bar Settings", bundle: ResourceBundle.bundle)
+                        Text("Needed to list, hide and move app icons.", bundle: ResourceBundle.bundle)
+                    }
+                }
                 if let apps {
                     Toggle(isOn: allAppsBinding(apps)) {
                         Text("All Apps", bundle: ResourceBundle.bundle)
@@ -70,24 +88,13 @@ struct SettingsView: View {
                             }
                         }
                     }
-                } else {
-                    LabeledContent {
-                        Button {
-                            ProtectedFileAccess.request()
-                            apps = AppCatalog.load()
-                        } label: {
-                            Text("Allow Access…", bundle: ResourceBundle.bundle)
-                        }
-                    } label: {
-                        Text("Menu Bar Settings", bundle: ResourceBundle.bundle)
-                        Text("Needed to list, hide and move app icons.", bundle: ResourceBundle.bundle)
-                    }
                 }
             } header: {
                 Text("Apps", bundle: ResourceBundle.bundle)
             } footer: {
                 Text("An app with several icons is hidden as a whole.", bundle: ResourceBundle.bundle)
             }
+            .disabled(!pending.isEmpty)
 
             Section {
                 LabeledContent {
@@ -116,10 +123,17 @@ struct SettingsView: View {
         }
         .formStyle(.grouped)
         .frame(width: 440, height: 600)
-        .onReceive(Timer.publish(every: 2, on: .main, in: .common).autoconnect()) { _ in
-            // Picks up the list once access has been allowed.
-            if apps == nil { apps = AppCatalog.load() }
-            isTrusted = MenuBarInspector.isTrusted(prompt: false)
+        .onReceive(Timer.publish(every: 2, on: .main, in: .common).autoconnect()) { _ in refresh() }
+    }
+
+    /// Picks up granted permissions and apps that start or quit while Settings is open.
+    private func refresh() {
+        hasAccess = ProtectedFileAccess.hasAccess
+        isTrusted = MenuBarInspector.isTrusted(prompt: false)
+        let fingerprint = AppCatalog.fingerprint()
+        if fingerprint != catalogFingerprint || apps == nil {
+            catalogFingerprint = fingerprint
+            apps = AppCatalog.load()
         }
     }
 
