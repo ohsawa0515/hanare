@@ -9,6 +9,8 @@ public final class HidingCoordinator {
         case idle
         /// The selected icons are hidden.
         case collapsed
+        /// Only the icons chosen for hover are shown, while the pointer is over the archer (会).
+        case peeking
         /// Hidden icons are shown again.
         case expanded
     }
@@ -29,6 +31,8 @@ public final class HidingCoordinator {
 
     /// The icons the user chose to hide, in the order they are revealed.
     public var targets: () -> [HideTarget] = { [] }
+    /// The hidden icons that appear on hover.
+    public var hoverTargets: () -> [HideTarget] = { [] }
     /// Seconds before revealed icons are hidden again. `0` disables it.
     public var autoCollapseDelay: () -> TimeInterval = { 0 }
 
@@ -56,7 +60,7 @@ public final class HidingCoordinator {
     public func toggle() {
         switch state {
         case .idle, .expanded: collapse()
-        case .collapsed: expand()
+        case .collapsed, .peeking: expand()
         }
     }
 
@@ -79,25 +83,58 @@ public final class HidingCoordinator {
         }
     }
 
+    /// Reveals only the icons chosen for hover. Does nothing unless the icons are hidden.
+    public func peek() {
+        guard state == .collapsed else { return }
+        let wanted = Set(hoverTargets())
+        let queue = revealOrder().filter(wanted.contains)
+        guard !queue.isEmpty else { return }
+        cancelTimers()
+        willExpand?()
+        state = .peeking
+        reveal(queue) {}
+    }
+
+    /// Hides the icons shown by ``peek()`` again.
+    public func endPeek() {
+        if state == .peeking { collapse() }
+    }
+
     /// Reveals hidden icons one by one, starting with the first selected.
     public func expand() {
         cancelTimers()
         willExpand?()
-        var queue = visibility.hiddenItems.map(\.target)
         state = .expanded
+        reveal(revealOrder()) { [weak self] in
+            guard let self else { return }
+            if self.visibility.hiddenItems.isEmpty {
+                // The hide-again delay counts from when the last icon is back.
+                self.scheduleAutoCollapse()
+            } else {
+                // Some restores failed: those icons are still hidden, so the next click
+                // should try to reveal them again.
+                self.state = .collapsed
+            }
+        }
+    }
+
+    /// The hidden icons in the order the user chose them. Restoring and hiding an icon again moves it
+    /// to the end of the journal, so the order is rebuilt from the selection. Icons no longer
+    /// selected but still hidden come last, so a failed restore can be retried.
+    private func revealOrder() -> [HideTarget] {
+        let chosen = targets()
+        let hidden = visibility.hiddenItems.map(\.target)
+        return chosen.filter(hidden.contains) + hidden.filter { !chosen.contains($0) }
+    }
+
+    private func reveal(_ targets: [HideTarget], completion: @escaping @MainActor () -> Void) {
+        var queue = targets
         revealTimer = Timer.scheduledTimer(withTimeInterval: Timing.revealInterval, repeats: true) { [weak self] timer in
             MainActor.assumeIsolated {
                 guard let self else { return }
                 guard !queue.isEmpty else {
                     self.revealTimer?.invalidate()
-                    if self.visibility.hiddenItems.isEmpty {
-                        // The hide-again delay counts from when the last icon is back.
-                        self.scheduleAutoCollapse()
-                    } else {
-                        // Some restores failed: those icons are still hidden, so the next click
-                        // should try to reveal them again.
-                        self.state = .collapsed
-                    }
+                    completion()
                     return
                 }
                 self.visibility.restore(queue.removeFirst())

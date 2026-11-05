@@ -7,11 +7,18 @@ final class StatusBarController {
     private enum Const {
         /// How long the release pose is shown before the follow-through.
         static let releaseDuration: TimeInterval = 0.35
+        /// How often the pointer is checked while hover icons are shown.
+        static let peekPollInterval: TimeInterval = 0.25
+        /// How long the pointer may stay away from the menu bar before the hover icons hide again.
+        static let peekGrace: TimeInterval = 0.5
     }
 
     static let autosaveName = "Hanare.toggle"
 
     var onOpenSettings: (() -> Void)?
+    /// Whether hover icons must stay shown, e.g. while one is being dragged.
+    var isPeekHeld: () -> Bool = { false }
+    var onOpenAbout: (() -> Void)?
     /// Called when the archer is clicked while no icon is chosen.
     var onClickWithoutChoice: (() -> Void)?
     /// Called when the user has just allowed access to the menu bar files.
@@ -25,6 +32,8 @@ final class StatusBarController {
     private var isReleasing = false
     private var didRequestAccess = false
     private var releaseTimer: Timer?
+    private var peekTimer: Timer?
+    private var pointerAwaySince: Date?
 
     init(settings: AppSettings, coordinator: HidingCoordinator) {
         self.settings = settings
@@ -42,6 +51,7 @@ final class StatusBarController {
             hoverView.autoresizingMask = [.width, .height]
             hoverView.onHoverChanged = { [weak self] hovering in
                 self?.isHovering = hovering
+                if hovering { self?.coordinator.peek() }
                 self?.updateAppearance()
             }
             button.addSubview(hoverView)
@@ -69,7 +79,7 @@ final class StatusBarController {
 
     private func showMenu() {
         let menu = NSMenu()
-        menu.addItem(withTitle: L10n.showAllIcons, action: #selector(showAllSelected), keyEquivalent: "").target = self
+        menu.addItem(withTitle: L10n.about, action: #selector(aboutSelected), keyEquivalent: "").target = self
         menu.addItem(.separator())
         menu.addItem(withTitle: L10n.settings, action: #selector(settingsSelected), keyEquivalent: ",").target = self
         menu.addItem(.separator())
@@ -79,7 +89,7 @@ final class StatusBarController {
         item.menu = nil
     }
 
-    @objc private func showAllSelected() { coordinator.restoreAll() }
+    @objc private func aboutSelected() { onOpenAbout?() }
     @objc private func settingsSelected() { onOpenSettings?() }
 
     /// Asks once per launch for the menu bar files macOS protects.
@@ -93,6 +103,7 @@ final class StatusBarController {
 
     private func stateDidChange(_ state: HidingCoordinator.State) {
         releaseTimer?.invalidate()
+        if state == .peeking { startWatchingPointer() } else { stopWatchingPointer() }
         isReleasing = state == .expanded
         if isReleasing {
             releaseTimer = Timer.scheduledTimer(withTimeInterval: Const.releaseDuration, repeats: false) { [weak self] _ in
@@ -105,6 +116,34 @@ final class StatusBarController {
         updateAppearance()
     }
 
+    /// Keeps the hover icons shown while the pointer is on the archer or anywhere in the menu bar
+    /// (so they can be reached), and hides them once it leaves.
+    private func startWatchingPointer() {
+        stopWatchingPointer()
+        peekTimer = Timer.scheduledTimer(withTimeInterval: Const.peekPollInterval, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated {
+                guard let self else { return }
+                if self.isPointerInMenuBar || self.isPeekHeld() {
+                    self.pointerAwaySince = nil
+                    return
+                }
+                let since = self.pointerAwaySince ?? Date()
+                self.pointerAwaySince = since
+                if Date().timeIntervalSince(since) >= Const.peekGrace { self.coordinator.endPeek() }
+            }
+        }
+    }
+
+    private func stopWatchingPointer() {
+        peekTimer?.invalidate()
+        peekTimer = nil
+        pointerAwaySince = nil
+    }
+
+    private var isPointerInMenuBar: Bool {
+        MenuBarDragging.isInMenuBar(NSEvent.mouseLocation)
+    }
+
     private func updateAppearance() {
         item.button?.image = CharacterImages.image(style: settings.character, pose: currentPose)
     }
@@ -112,6 +151,7 @@ final class StatusBarController {
     private var currentPose: Pose {
         switch coordinator.state {
         case .expanded: isReleasing ? .hanare : .zanshin
+        case .peeking: .kai
         case .idle, .collapsed: isHovering ? .kai : .yugamae
         }
     }

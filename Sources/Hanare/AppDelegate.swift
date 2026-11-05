@@ -15,6 +15,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         restoreAll: { [weak self] in self?.coordinator.restoreAll() },
         setHidden: { [weak self] targets, hidden in await self?.setHidden(targets, hidden) }
     ))
+    private lazy var aboutWindow = AboutWindowController(settings: settings)
     private var signalSources: [DispatchSourceSignal] = []
     private var accessibilityTimer: Timer?
 
@@ -22,11 +23,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         ProtectedFileAccess.activate()
         coordinator.restoreLeftovers()
         coordinator.targets = { [settings] in settings.hiddenTargets }
+        coordinator.hoverTargets = { [settings] in settings.hoverTargets }
         coordinator.autoCollapseDelay = { [settings] in settings.autoCollapseDelay }
         coordinator.willExpand = { [weak self] in self?.dragging.keepHiddenOnLeft() }
 
         let statusBar = StatusBarController(settings: settings, coordinator: coordinator)
         statusBar.onOpenSettings = { [weak self] in self?.settingsWindow.show() }
+        statusBar.isPeekHeld = { [weak self] in self?.dragging.isBusy ?? false }
+        statusBar.onOpenAbout = { [weak self] in self?.aboutWindow.show() }
         statusBar.onAccessGranted = { [weak self] in self?.applyLayout(attempt: 0) }
         statusBar.onClickWithoutChoice = { [weak self] in
             guard let self else { return }

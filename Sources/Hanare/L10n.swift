@@ -3,7 +3,7 @@ import HanareCore
 
 /// Localized strings. Translations live in `Resources/Localizable.xcstrings`.
 enum L10n {
-    static var showAllIcons: String { string("Show All Icons") }
+    static var about: String { string("About Hanare") }
     static var settings: String { string("Settings…") }
     static var quit: String { string("Quit Hanare") }
     static var accessTitle: String { string("Allow Access to the Menu Bar Settings") }
@@ -15,6 +15,7 @@ enum L10n {
     static func choosePanelMessage(_ fileName: String) -> String {
         string("Select “\(fileName)”, then click Allow Access.")
     }
+    static var showOnHover: String { string("Also show on hover") }
     static var cancel: String { string("Cancel") }
 
     static func name(of item: SystemItem) -> String {
@@ -30,6 +31,6 @@ enum L10n {
     }
 
     static func string(_ key: String.LocalizationValue) -> String {
-        String(localized: key, bundle: ResourceBundle.bundle)
+        String(localized: key, bundle: ResourceBundle.strings)
     }
 }

@@ -23,9 +23,14 @@ final class MenuBarDragging {
 
     private var monitor: Any?
     private var isMoving = false
+    private var isReadingBack = false
     private var didPrompt = false
     /// The icon being dragged.
     private var dragged: HideTarget?
+
+    /// Whether an icon is being dragged or its drop position has yet to be read. Icons must stay
+    /// on screen until then, so they can be found.
+    var isBusy: Bool { dragged != nil || isReadingBack || isMoving }
 
     init(settings: AppSettings, coordinator: HidingCoordinator) {
         self.settings = settings
@@ -66,6 +71,8 @@ final class MenuBarDragging {
         dragged = nil
         let dropPoint = Self.axPoint(NSEvent.mouseLocation)
         let restoreAllCount = coordinator.restoreAllCount
+        isReadingBack = true
+        defer { isReadingBack = false }
         try? await Task.sleep(for: Const.settleDelay)
         let items = inspector.snapshots()
         guard let toggle = items.first(where: { $0.pid == ownPID })?.frame,
@@ -209,7 +216,9 @@ final class MenuBarDragging {
         CGPoint(x: point.x, y: (NSScreen.screens.first?.frame.height ?? 0) - point.y)
     }
 
-    private static func isInMenuBar(_ location: NSPoint) -> Bool {
+    /// Whether the point is in the menu bar of any display. Uses a default height when the menu bar
+    /// reserves no space, as when it hides automatically.
+    static func isInMenuBar(_ location: NSPoint) -> Bool {
         NSScreen.screens.contains { screen in
             let frame = screen.frame
             let reserved = frame.maxY - screen.visibleFrame.maxY

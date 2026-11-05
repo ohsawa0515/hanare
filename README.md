@@ -1,10 +1,24 @@
+<p align="center">
+  <img src="docs/logo.png" width="160" height="160" alt="Hanare logo">
+</p>
+<p align="center">
+  <a href="https://github.com/ohsawa0515/hanare/releases/latest"><img src="https://img.shields.io/badge/download-latest-brightgreen.svg" alt="download"></a>
+  <img src="https://img.shields.io/badge/platform-macOS-lightgrey.svg" alt="platform">
+  <img src="https://img.shields.io/badge/requirements-macOS%2027%2B-ff69b4.svg" alt="system requirements">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-blue.svg" alt="license"></a>
+</p>
+
 # Hanare
 
-[日本語](README.ja.md)
+English | [日本語](README.ja.md)
 
 Hide menu bar icons.
 
-Hanare (離れ) is the release in Japanese archery (kyudo). An archer in hakama stands in your menu bar and keeps the icons you don't need hidden. Hover over the archer and it draws the bow (会, *kai*); click it and the arrow is released (離れ, *hanare*) and the hidden icons appear one after another. You choose which icons to hide in Settings.
+<p align="center">
+  <img src="docs/demo.gif" alt="Hanare demo">
+</p>
+
+Hanare (離れ) is the release in Japanese archery (kyudo). An archer in hakama stands in your menu bar and keeps the icons you don't need hidden. Hover over the archer and it draws the bow (会, *kai*): the icons you use often appear. Click it and the arrow is released (離れ, *hanare*) and all hidden icons appear one after another. You choose which icons to hide, and which of them also appear on hover, in Settings.
 
 ## Requirements
 
@@ -34,12 +48,13 @@ On launch, the icons to the left of the archer are hidden, so the menu bar layou
 
 | Action | Result |
 | --- | --- |
-| Click the archer | Hide / show the chosen icons |
+| Hover over the archer | Shows the hidden icons marked "Also show on hover"; they hide again when the pointer leaves the menu bar |
+| Click the archer | Show all hidden icons / hide them again |
 | Command-drag an icon to the left of the archer | That icon is hidden (needs Accessibility) |
 | Command-drag a revealed icon to the right of the archer | That icon is no longer hidden (needs Accessibility) |
 | Right-click the archer | Menu (show all icons, settings, quit) |
 
-Choose the icons to hide in Settings, or by dragging. An icon you choose in Settings is also moved next to the archer's left side, without moving the pointer, so what is hidden always sits to its left. "All Apps" chooses every app at once. Wi-Fi, Sound, Battery, Display, Bluetooth, Now Playing and the input menu are listed under System, and every app that has a menu bar icon under Apps.
+Choose the icons to hide in Settings, or by dragging. Press the cursor button next to a hidden icon in Settings to also show it on hover. An icon you choose in Settings is also moved next to the archer's left side, without moving the pointer, so what is hidden always sits to its left. "All Apps" chooses every app at once. Wi-Fi, Sound, Battery, Display, Bluetooth, Now Playing and the input menu are listed under System, and every app that has a menu bar icon under Apps.
 
 In Settings you can choose the character (male archer, female archer, or a simple chevron), how long until icons are hidden again, and launch at login.
 
