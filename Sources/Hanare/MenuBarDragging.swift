@@ -209,7 +209,9 @@ final class MenuBarDragging {
         CGPoint(x: point.x, y: (NSScreen.screens.first?.frame.height ?? 0) - point.y)
     }
 
-    private static func isInMenuBar(_ location: NSPoint) -> Bool {
+    /// Whether the point is in the menu bar of any display. Uses a default height when the menu bar
+    /// reserves no space, as when it hides automatically.
+    static func isInMenuBar(_ location: NSPoint) -> Bool {
         NSScreen.screens.contains { screen in
             let frame = screen.frame
             let reserved = frame.maxY - screen.visibleFrame.maxY

@@ -15,7 +15,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         restoreAll: { [weak self] in self?.coordinator.restoreAll() },
         setHidden: { [weak self] targets, hidden in await self?.setHidden(targets, hidden) }
     ))
-    private lazy var aboutWindow = AboutWindowController()
+    private lazy var aboutWindow = AboutWindowController(settings: settings)
     private var signalSources: [DispatchSourceSignal] = []
     private var accessibilityTimer: Timer?
 

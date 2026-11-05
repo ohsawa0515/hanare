@@ -139,10 +139,7 @@ final class StatusBarController {
     }
 
     private var isPointerInMenuBar: Bool {
-        let location = NSEvent.mouseLocation
-        guard let screen = NSScreen.screens.first(where: { $0.frame.contains(location) }) else { return false }
-        // The menu bar is the strip between the visible area and the top of the screen.
-        return location.y >= screen.visibleFrame.maxY
+        MenuBarDragging.isInMenuBar(NSEvent.mouseLocation)
     }
 
     private func updateAppearance() {

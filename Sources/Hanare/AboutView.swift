@@ -83,7 +83,12 @@ struct AboutView: View {
 
 @MainActor
 final class AboutWindowController {
+    private let settings: AppSettings
     private var window: NSWindow?
+
+    init(settings: AppSettings) {
+        self.settings = settings
+    }
 
     func show() {
         if window == nil {
@@ -92,12 +97,28 @@ final class AboutWindowController {
             window.isReleasedWhenClosed = false
             window.center()
             self.window = window
-        } else if let hosting = window?.contentViewController as? NSHostingController<AboutView> {
-            hosting.rootView = AboutView()  // picks up a language change
+            observeLanguage()
         }
-        window?.title = L10n.about
+        refresh()
         NSApp.activate()
         window?.makeKeyAndOrderFront(nil)
         window?.orderFrontRegardless()
+    }
+
+    /// Rebuilds the view and the title so they follow the language chosen in Settings.
+    private func refresh() {
+        window?.title = L10n.about
+        (window?.contentViewController as? NSHostingController<AboutView>)?.rootView = AboutView()
+    }
+
+    private func observeLanguage() {
+        withObservationTracking {
+            _ = settings.language
+        } onChange: { [weak self] in
+            DispatchQueue.main.async {
+                self?.refresh()
+                self?.observeLanguage()
+            }
+        }
     }
 }

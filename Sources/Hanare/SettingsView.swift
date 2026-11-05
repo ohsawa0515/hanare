@@ -168,15 +168,11 @@ struct SettingsView: View {
             }
             .buttonStyle(.plain)
             .help(L10n.showOnHover)
+            .accessibilityLabel(L10n.showOnHover)
+            .accessibilityValue(L10n.string(onHover ? "On" : "Off"))
+            .accessibilityAddTraits(.isToggle)
             .disabled(!hidden)
         }
-    }
-
-    private func hoverBinding(for target: HideTarget) -> Binding<Bool> {
-        Binding(
-            get: { settings.isShownOnHover(target) },
-            set: { settings.setShownOnHover($0, for: target) }
-        )
     }
 
     private func binding(for target: HideTarget) -> Binding<Bool> {
