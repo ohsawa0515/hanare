@@ -59,7 +59,8 @@ final class StatusBarController {
         guard let event = NSApp.currentEvent else { return }
         if event.type == .rightMouseUp || event.modifierFlags.contains(.control) {
             showMenu()
-        } else if settings.hiddenTargets.isEmpty {
+        } else if settings.hiddenTargets.isEmpty, coordinator.currentlyHidden.isEmpty {
+            // Icons still hidden after a failed restore are revealed by a normal click instead.
             onClickWithoutChoice?()
         } else {
             coordinator.toggle()
