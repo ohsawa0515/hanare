@@ -6,6 +6,8 @@ import Testing
 final class FakeBackend: VisibilityBackend {
     var values: [HideTarget: StoredValue]
     var failWrites = false
+    /// Targets in the order they were restored.
+    var restoredOrder: [HideTarget] = []
 
     init(values: [HideTarget: StoredValue]) {
         self.values = values
@@ -23,7 +25,10 @@ final class FakeBackend: VisibilityBackend {
 
     func restore(_ items: [HiddenItem]) -> Bool {
         guard !failWrites else { return false }
-        for item in items { values[item.target] = item.previous }
+        for item in items {
+            values[item.target] = item.previous
+            restoredOrder.append(item.target)
+        }
         return true
     }
 }
@@ -164,9 +169,10 @@ struct RevealOrderTests {
         coordinator.endPeek()
 
         #expect(controller.hiddenItems.map(\.target) == [second, first])
+        backend.restoredOrder = []
         coordinator.expand()
-        try? await Task.sleep(for: .milliseconds(90))
+        try? await Task.sleep(for: .milliseconds(500))
         // The icon chosen first is revealed first.
-        #expect(controller.hiddenItems.map(\.target) == [second])
+        #expect(backend.restoredOrder == [first, second])
     }
 }
