@@ -1,0 +1,356 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "%lld seconds": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 秒"
+          }
+        }
+      }
+    },
+    "Accessibility": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アクセシビリティ"
+          }
+        }
+      }
+    },
+    "All Apps": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "すべてのアプリ"
+          }
+        }
+      }
+    },
+    "Allow Access": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アクセスを許可"
+          }
+        }
+      }
+    },
+    "Allow Access to the Menu Bar Settings": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "メニューバーの設定へのアクセスを許可してください"
+          }
+        }
+      }
+    },
+    "Allow Access…": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アクセスを許可…"
+          }
+        }
+      }
+    },
+    "Allowed": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "許可済み"
+          }
+        }
+      }
+    },
+    "An app with several icons is hidden as a whole.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "複数のアイコンを出すアプリは、まとめて隠れます。"
+          }
+        }
+      }
+    },
+    "Apps": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アプリ"
+          }
+        }
+      }
+    },
+    "Archer (female)": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "射手（女性）"
+          }
+        }
+      }
+    },
+    "Archer (male)": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "射手（男性）"
+          }
+        }
+      }
+    },
+    "Battery": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バッテリー"
+          }
+        }
+      }
+    },
+    "Bluetooth": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bluetooth"
+          }
+        }
+      }
+    },
+    "Cancel": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "キャンセル"
+          }
+        }
+      }
+    },
+    "Character": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "キャラクター"
+          }
+        }
+      }
+    },
+    "Display": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ディスプレイ"
+          }
+        }
+      }
+    },
+    "Hanare Settings": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hanare の設定"
+          }
+        }
+      }
+    },
+    "Hide again after": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自動で隠すまでの時間"
+          }
+        }
+      }
+    },
+    "Input Menu": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "入力メニュー"
+          }
+        }
+      }
+    },
+    "Launch at login": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ログイン時に起動"
+          }
+        }
+      }
+    },
+    "Menu Bar Settings": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "メニューバーの設定"
+          }
+        }
+      }
+    },
+    "Needed to list, hide and move app icons.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アプリのアイコンの一覧表示、非表示、移動に必要です。"
+          }
+        }
+      }
+    },
+    "Never": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "しない"
+          }
+        }
+      }
+    },
+    "Now Playing": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再生中"
+          }
+        }
+      }
+    },
+    "Open System Settings": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "システム設定を開く"
+          }
+        }
+      }
+    },
+    "Optional. Lets you hide an icon by Command-dragging it to the left of the archer.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "任意。Command キーを押しながらアイコンを射手の左へドラッグして、隠せるようになります。"
+          }
+        }
+      }
+    },
+    "Quit Hanare": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hanare を終了"
+          }
+        }
+      }
+    },
+    "Select “%@”, then click Allow Access.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「%@」が選択されていることを確かめて、「アクセスを許可」を押してください。"
+          }
+        }
+      }
+    },
+    "Settings…": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "設定…"
+          }
+        }
+      }
+    },
+    "Show All Icons": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "すべてのアイコンを表示"
+          }
+        }
+      }
+    },
+    "Simple": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "シンプル"
+          }
+        }
+      }
+    },
+    "Sound": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "サウンド"
+          }
+        }
+      }
+    },
+    "System": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "システム"
+          }
+        }
+      }
+    },
+    "To hide and move icons, Hanare needs two files that macOS protects: the list of apps allowed in the menu bar and the menu bar order. Click Allow Access in each of the next two windows.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アイコンを隠したり移動したりするために、macOS が保護している2つのファイル（メニューバーに表示するアプリの一覧と、メニューバーの並び順）が必要です。続く2つの画面で「アクセスを許可」を押してください。"
+          }
+        }
+      }
+    },
+    "Wi-Fi": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wi-Fi"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}
