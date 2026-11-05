@@ -10,7 +10,7 @@
 
 # Hanare
 
-[English](README.md)
+[English](README.md) | 日本語
 
 メニューバーのアイコンを隠すアプリです。
 
