@@ -34,11 +34,6 @@ public struct AppVisibilityBackend: VisibilityBackend {
         readEntries() != nil
     }
 
-    /// One bundle ID for each app macOS lists in System Settings > Menu Bar, or `nil` if unreadable.
-    public func trackedBundleIDs() -> [String]? {
-        canonicalBundleIDs().map { Array(Set($0.values)) }
-    }
-
     /// Maps every bundle ID that owns status items to the one Hanare uses for its app. An app's
     /// items can be owned by several processes that share a single on/off switch.
     public func canonicalBundleIDs() -> [String: String]? {

@@ -65,11 +65,14 @@ final class MenuBarDragging {
         guard let target = dragged else { return }
         dragged = nil
         let dropPoint = Self.axPoint(NSEvent.mouseLocation)
+        let restoreAllCount = coordinator.restoreAllCount
         try? await Task.sleep(for: Const.settleDelay)
         let items = inspector.snapshots()
         guard let toggle = items.first(where: { $0.pid == ownPID })?.frame,
               let side = MenuBarLayout.side(of: target, droppedNear: dropPoint, in: items, relativeTo: toggle, ownPID: ownPID)
         else { return }
+        // A Show All during the wait wins over hiding the dropped icon.
+        if side == .left, coordinator.restoreAllCount != restoreAllCount { return }
         settings.setHidden(side == .left, for: [AppIdentity.current().canonical(target)])
         keepHiddenOnLeft()
     }

@@ -59,6 +59,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// Hides the icons to the left of the archer. The menu bar is not always fully readable right
     /// after launch, so an empty result is retried a few times before giving up.
     private func applyLayout(attempt: Int) {
+        // Show All before the launch work finishes means the user wants the icons visible.
+        guard coordinator.restoreAllCount == 0 else { return }
         dragging.syncChoiceWithPositions()
         if !settings.hiddenTargets.isEmpty {
             coordinator.collapse()
@@ -75,6 +77,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func setHidden(_ targets: [HideTarget], _ hidden: Bool) async {
         // Show All while an icon is being moved wins over hiding it afterwards.
         let restoreAllCount = coordinator.restoreAllCount
+        // While icons are being revealed one by one, a deselected icon may still be queued; bring
+        // it back now so it is placed on the right like the others.
+        if !hidden { coordinator.restore(targets) }
         if dragging.canMoveWithoutPointer {
             await dragging.place(targets, hidden: hidden)
         } else if hidden {
@@ -96,6 +101,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             MainActor.assumeIsolated {
                 guard let self, MenuBarInspector.isTrusted(prompt: false) else { return }
                 self.accessibilityTimer?.invalidate()
+                guard self.coordinator.restoreAllCount == 0 else { return }
                 self.dragging.syncChoiceWithPositions()
                 if !self.settings.hiddenTargets.isEmpty { self.coordinator.collapse() }
             }

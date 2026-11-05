@@ -89,14 +89,26 @@ public final class HidingCoordinator {
             MainActor.assumeIsolated {
                 guard let self else { return }
                 guard !queue.isEmpty else {
-                    // The hide-again delay counts from when the last icon is back.
                     self.revealTimer?.invalidate()
-                    self.scheduleAutoCollapse()
+                    if self.visibility.hiddenItems.isEmpty {
+                        // The hide-again delay counts from when the last icon is back.
+                        self.scheduleAutoCollapse()
+                    } else {
+                        // Some restores failed: those icons are still hidden, so the next click
+                        // should try to reveal them again.
+                        self.state = .collapsed
+                    }
                     return
                 }
                 self.visibility.restore(queue.removeFirst())
             }
         }
+    }
+
+    /// Shows the given icons right away if Hanare hid them.
+    public func restore(_ targets: [HideTarget]) {
+        visibility.restore(targets)
+        if visibility.hiddenItems.isEmpty, state == .collapsed { state = .idle }
     }
 
     /// Shows every hidden icon and stops hiding until the user collapses again.
