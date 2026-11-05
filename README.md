@@ -14,7 +14,9 @@ English | [日本語](README.ja.md)
 
 Hide menu bar icons.
 
-![Hanare demo](docs/demo.gif)
+<p align="center">
+  <img src="docs/demo.gif" alt="Hanare demo">
+</p>
 
 Hanare (離れ) is the release in Japanese archery (kyudo). An archer in hakama stands in your menu bar and keeps the icons you don't need hidden. Hover over the archer and it draws the bow (会, *kai*): the icons you use often appear. Click it and the arrow is released (離れ, *hanare*) and all hidden icons appear one after another. You choose which icons to hide, and which of them also appear on hover, in Settings.
 
