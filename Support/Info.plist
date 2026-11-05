@@ -25,6 +25,8 @@
 	<string>$(VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(BUILD_NUMBER)</string>
+	<key>HanareCommit</key>
+	<string>$(COMMIT)</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>27.0</string>
 	<key>LSUIElement</key>

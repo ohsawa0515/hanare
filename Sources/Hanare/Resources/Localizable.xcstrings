@@ -11,6 +11,16 @@
         }
       }
     },
+    "About Hanare": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hanare について"
+          }
+        }
+      }
+    },
     "Accessibility": {
       "localizations": {
         "ja": {
@@ -67,6 +77,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "許可済み"
+          }
+        }
+      }
+    },
+    "Also show on hover": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "カーソルを乗せたときにも表示"
           }
         }
       }
@@ -131,6 +151,16 @@
         }
       }
     },
+    "Build": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ビルド"
+          }
+        }
+      }
+    },
     "Cancel": {
       "localizations": {
         "ja": {
@@ -147,6 +177,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "キャラクター"
+          }
+        }
+      }
+    },
+    "Commit": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "コミット"
+          }
+        }
+      }
+    },
+    "Copied": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "コピーしました"
+          }
+        }
+      }
+    },
+    "Copy Debug Info": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "デバッグ情報をコピー"
           }
         }
       }
@@ -171,6 +231,16 @@
         }
       }
     },
+    "Help": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ヘルプ"
+          }
+        }
+      }
+    },
     "Hide again after": {
       "localizations": {
         "ja": {
@@ -181,12 +251,32 @@
         }
       }
     },
+    "Hide menu bar icons.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "メニューバーのアイコンを隠します。"
+          }
+        }
+      }
+    },
     "Input Menu": {
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
             "value": "入力メニュー"
+          }
+        }
+      }
+    },
+    "Language": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "言語"
           }
         }
       }
@@ -337,6 +427,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "アイコンを隠したり移動したりするために、macOS が保護している2つのファイル（メニューバーに表示するアプリの一覧と、メニューバーの並び順）が必要です。続く2つの画面で「アクセスを許可」を押してください。"
+          }
+        }
+      }
+    },
+    "Turn on a switch to hide that icon. Hidden icons stay off the menu bar until you click the archer.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スイッチをオンにすると、そのアイコンを隠します。隠したアイコンは、射手をクリックするまでメニューバーに現れません。"
+          }
+        }
+      }
+    },
+    "Turn on the cursor button of a hidden icon to also show it while the pointer is over the archer. Use it for icons you need often.": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "隠したアイコンのカーソルのボタンをオンにすると、射手にカーソルを乗せている間もそのアイコンが現れます。よく使うアイコンに使います。"
+          }
+        }
+      }
+    },
+    "Version": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バージョン"
           }
         }
       }

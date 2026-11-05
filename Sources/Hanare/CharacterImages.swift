@@ -52,3 +52,22 @@ enum ResourceBundle {
         return .module
     }()
 }
+
+extension ResourceBundle {
+    /// The bundle strings are read from, following the language chosen in Settings. English is the
+    /// source language, so it uses an empty bundle that returns the keys themselves.
+    static var strings: Bundle {
+        switch AppLanguage.stored() {
+        case .english:
+            return emptyBundle
+        case .japanese:
+            return bundle.path(forResource: "ja", ofType: "lproj").flatMap(Bundle.init(path:)) ?? emptyBundle
+        }
+    }
+
+    private static let emptyBundle: Bundle = {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("HanareEmpty.bundle")
+        try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+        return Bundle(url: url) ?? .main
+    }()
+}

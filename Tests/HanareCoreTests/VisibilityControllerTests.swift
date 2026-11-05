@@ -3,7 +3,7 @@ import Testing
 @testable import HanareCore
 
 /// In-memory backend for app targets.
-private final class FakeBackend: VisibilityBackend {
+final class FakeBackend: VisibilityBackend {
     var values: [HideTarget: StoredValue]
     var failWrites = false
 
@@ -91,5 +91,57 @@ struct VisibilityControllerTests {
         #expect(controller.hide([shown]) == [shown])
         #expect(backend.values[shown] == .bool(false))
         #expect(controller.hiddenItems == [HiddenItem(target: shown, previous: .bool(true))])
+    }
+}
+
+@MainActor
+struct HidingCoordinatorPeekTests {
+    private let always = HideTarget.app(bundleID: "com.example.always")
+    private let often = HideTarget.app(bundleID: "com.example.often")
+
+    private func makeCoordinator() -> (HidingCoordinator, FakeBackend) {
+        let backend = FakeBackend(values: [always: .bool(true), often: .bool(true)])
+        let store = HiddenItemsStore(defaults: UserDefaults(suiteName: "HanareTests-\(UUID().uuidString)")!)
+        let coordinator = HidingCoordinator(visibility: VisibilityController(backends: [backend], store: store))
+        coordinator.targets = { [always, often] }
+        coordinator.hoverTargets = { [often] }
+        return (coordinator, backend)
+    }
+
+    private func settle() async { try? await Task.sleep(for: .milliseconds(400)) }
+
+    @Test func peekShowsOnlyHoverTargetsAndEndPeekHidesThemAgain() async {
+        let (coordinator, backend) = makeCoordinator()
+        coordinator.collapse()
+
+        coordinator.peek()
+        #expect(coordinator.state == .peeking)
+        await settle()
+        #expect(backend.values[often] == .bool(true))
+        #expect(backend.values[always] == .bool(false))
+
+        coordinator.endPeek()
+        #expect(coordinator.state == .collapsed)
+        #expect(backend.values[often] == .bool(false))
+    }
+
+    @Test func clickWhilePeekingShowsEverything() async {
+        let (coordinator, backend) = makeCoordinator()
+        coordinator.collapse()
+        coordinator.peek()
+        await settle()
+
+        coordinator.toggle()
+        #expect(coordinator.state == .expanded)
+        await settle()
+        #expect(backend.values[always] == .bool(true))
+    }
+
+    @Test func peekDoesNothingWithoutHoverTargets() {
+        let (coordinator, _) = makeCoordinator()
+        coordinator.hoverTargets = { [] }
+        coordinator.collapse()
+        coordinator.peek()
+        #expect(coordinator.state == .collapsed)
     }
 }
