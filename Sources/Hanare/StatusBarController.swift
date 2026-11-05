@@ -16,6 +16,8 @@ final class StatusBarController {
     static let autosaveName = "Hanare.toggle"
 
     var onOpenSettings: (() -> Void)?
+    /// Whether hover icons must stay shown, e.g. while one is being dragged.
+    var isPeekHeld: () -> Bool = { false }
     var onOpenAbout: (() -> Void)?
     /// Called when the archer is clicked while no icon is chosen.
     var onClickWithoutChoice: (() -> Void)?
@@ -121,7 +123,7 @@ final class StatusBarController {
         peekTimer = Timer.scheduledTimer(withTimeInterval: Const.peekPollInterval, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated {
                 guard let self else { return }
-                if self.isPointerInMenuBar {
+                if self.isPointerInMenuBar || self.isPeekHeld() {
                     self.pointerAwaySince = nil
                     return
                 }

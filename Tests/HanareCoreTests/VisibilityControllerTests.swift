@@ -145,3 +145,28 @@ struct HidingCoordinatorPeekTests {
         #expect(coordinator.state == .collapsed)
     }
 }
+
+@MainActor
+struct RevealOrderTests {
+    @Test func keepsTheChosenOrderAfterAPeek() async {
+        let first = HideTarget.app(bundleID: "com.example.first")
+        let second = HideTarget.app(bundleID: "com.example.second")
+        let backend = FakeBackend(values: [first: .bool(true), second: .bool(true)])
+        let store = HiddenItemsStore(defaults: UserDefaults(suiteName: "HanareTests-\(UUID().uuidString)")!)
+        let controller = VisibilityController(backends: [backend], store: store)
+        let coordinator = HidingCoordinator(visibility: controller)
+        coordinator.targets = { [first, second] }
+        coordinator.hoverTargets = { [first] }
+
+        coordinator.collapse()
+        coordinator.peek()
+        try? await Task.sleep(for: .milliseconds(300))
+        coordinator.endPeek()
+
+        #expect(controller.hiddenItems.map(\.target) == [second, first])
+        coordinator.expand()
+        try? await Task.sleep(for: .milliseconds(90))
+        // The icon chosen first is revealed first.
+        #expect(controller.hiddenItems.map(\.target) == [second])
+    }
+}

@@ -98,7 +98,7 @@ struct SettingsView: View {
             } header: {
                 sectionHeader("Apps")
             } footer: {
-                Text("An app with several icons is hidden as a whole. The cursor button shows a hidden icon when the pointer is over the archer.", bundle: ResourceBundle.strings)
+                Text("An app with several icons is hidden as a whole.", bundle: ResourceBundle.strings)
             }
             .disabled(!pending.isEmpty)
 

@@ -87,7 +87,7 @@ public final class HidingCoordinator {
     public func peek() {
         guard state == .collapsed else { return }
         let wanted = Set(hoverTargets())
-        let queue = visibility.hiddenItems.map(\.target).filter(wanted.contains)
+        let queue = revealOrder().filter(wanted.contains)
         guard !queue.isEmpty else { return }
         cancelTimers()
         willExpand?()
@@ -105,7 +105,7 @@ public final class HidingCoordinator {
         cancelTimers()
         willExpand?()
         state = .expanded
-        reveal(visibility.hiddenItems.map(\.target)) { [weak self] in
+        reveal(revealOrder()) { [weak self] in
             guard let self else { return }
             if self.visibility.hiddenItems.isEmpty {
                 // The hide-again delay counts from when the last icon is back.
@@ -116,6 +116,15 @@ public final class HidingCoordinator {
                 self.state = .collapsed
             }
         }
+    }
+
+    /// The hidden icons in the order the user chose them. Restoring and hiding an icon again moves it
+    /// to the end of the journal, so the order is rebuilt from the selection. Icons no longer
+    /// selected but still hidden come last, so a failed restore can be retried.
+    private func revealOrder() -> [HideTarget] {
+        let chosen = targets()
+        let hidden = visibility.hiddenItems.map(\.target)
+        return chosen.filter(hidden.contains) + hidden.filter { !chosen.contains($0) }
     }
 
     private func reveal(_ targets: [HideTarget], completion: @escaping @MainActor () -> Void) {

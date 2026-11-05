@@ -29,6 +29,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         let statusBar = StatusBarController(settings: settings, coordinator: coordinator)
         statusBar.onOpenSettings = { [weak self] in self?.settingsWindow.show() }
+        statusBar.isPeekHeld = { [weak self] in self?.dragging.isBusy ?? false }
         statusBar.onOpenAbout = { [weak self] in self?.aboutWindow.show() }
         statusBar.onAccessGranted = { [weak self] in self?.applyLayout(attempt: 0) }
         statusBar.onClickWithoutChoice = { [weak self] in
