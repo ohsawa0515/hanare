@@ -69,9 +69,7 @@ public final class HidingCoordinator {
     public func collapse() {
         cancelTimers()
         let wanted = targets()
-        for item in visibility.hiddenItems where !wanted.contains(item.target) {
-            visibility.restore(item.target)
-        }
+        visibility.restore(visibility.hiddenItems.map(\.target).filter { !wanted.contains($0) })
         let denied = visibility.inaccessible(wanted)
         visibility.hide(wanted)
         state = visibility.hiddenItems.isEmpty ? .idle : .collapsed
@@ -104,9 +102,14 @@ public final class HidingCoordinator {
     /// Shows every hidden icon and stops hiding until the user collapses again.
     public func restoreAll() {
         cancelTimers()
+        restoreAllCount += 1
         visibility.restoreAll()
-        state = .idle
+        // Items a backend failed to restore are still hidden, so the next click retries the reveal.
+        state = visibility.hiddenItems.isEmpty ? .idle : .collapsed
     }
+
+    /// Increases on every Show All, so a slow change started earlier can tell it was overtaken.
+    public private(set) var restoreAllCount = 0
 
     private func scheduleAutoCollapse() {
         let delay = autoCollapseDelay()

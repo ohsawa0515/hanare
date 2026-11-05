@@ -62,7 +62,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         dragging.syncChoiceWithPositions()
         if !settings.hiddenTargets.isEmpty {
             coordinator.collapse()
-        } else if attempt < 4, dragging.canReadPositions {
+        } else if attempt < 4, dragging.canReadPositions || ProtectedFileAccess.hasAccess {
+            // The order file can lag behind right after launch, before Hanare's own item is in it.
             DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in self?.applyLayout(attempt: attempt + 1) }
         } else {
             settingsWindow.show()
@@ -72,18 +73,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// Applies a choice made in Settings and moves the icons to match: hidden icons to the left of
     /// the archer, shown icons to its right.
     private func setHidden(_ targets: [HideTarget], _ hidden: Bool) async {
+        // Show All while an icon is being moved wins over hiding it afterwards.
+        let restoreAllCount = coordinator.restoreAllCount
         if dragging.canMoveWithoutPointer {
             await dragging.place(targets, hidden: hidden)
-            settings.setHidden(hidden, for: targets)
         } else if hidden {
             await dragging.place(targets, hidden: true)
-            settings.setHidden(true, for: targets)
         } else {
             settings.setHidden(false, for: targets)
             coordinator.selectionChanged()  // a Command-drag needs the icons back on screen first
             try? await Task.sleep(for: .milliseconds(600))
             await dragging.place(targets, hidden: false)
+            return
         }
+        if hidden, coordinator.restoreAllCount != restoreAllCount { return }
+        settings.setHidden(hidden, for: targets)
     }
 
     /// Reads the menu bar layout as soon as the user allows Accessibility.

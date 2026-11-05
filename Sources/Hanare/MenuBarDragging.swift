@@ -70,7 +70,7 @@ final class MenuBarDragging {
         guard let toggle = items.first(where: { $0.pid == ownPID })?.frame,
               let side = MenuBarLayout.side(of: target, droppedNear: dropPoint, in: items, relativeTo: toggle, ownPID: ownPID)
         else { return }
-        settings.setHidden(side == .left, for: [target])
+        settings.setHidden(side == .left, for: [AppIdentity.current().canonical(target)])
         keepHiddenOnLeft()
     }
 
@@ -79,7 +79,7 @@ final class MenuBarDragging {
     func keepHiddenOnLeft() {
         guard let positionStore, var positions = positionStore.read() else { return }
         let before = positions
-        positions.place(Set(settings.hiddenTargets), on: .left)
+        positions.place(Set(AppIdentity.current().owners(of: settings.hiddenTargets)), on: .left)
         if positions != before { positionStore.write(positions) }
     }
 
@@ -97,22 +97,21 @@ final class MenuBarDragging {
             let isPresent: (HideTarget) -> Bool = { target in
                 if case .app(let bundleID) = target { running.contains(bundleID) } else { true }
             }
-            let sides = positions.sides(where: isPresent)
-            let hide = positions.targetsOnLeft(where: isPresent).filter { sides[$0] == [.left] && coordinator.isVisible($0) }
+            let identity = AppIdentity.current()
+            let sides = identity.merged(positions.sides(where: isPresent))
+            let hide = identity.canonical(positions.targetsOnLeft(where: isPresent))
+                .filter { sides[$0] == [.left] && coordinator.isVisible($0) }
             apply(hide: hide, show: sides.filter { $0.value == [.right] }.map(\.key))
             return
         }
         guard MenuBarInspector.isTrusted(prompt: false) else { return }
         let items = inspector.snapshots()
         guard let toggle = items.first(where: { $0.pid == ownPID })?.frame else { return }
-        let sides = MenuBarLayout.sides(of: items, relativeTo: toggle, ownPID: ownPID)
+        let identity = AppIdentity.current()
+        let sides = identity.merged(MenuBarLayout.sides(of: items, relativeTo: toggle, ownPID: ownPID))
         // Ordered from the icon nearest to the archer, which is the order they are revealed in.
-        var hide: [HideTarget] = []
-        for item in items.sorted(by: { $0.frame.minX > $1.frame.minX }) {
-            guard let target = MenuBarLayout.target(for: item), sides[target] == [.left],
-                  !hide.contains(target), coordinator.isVisible(target) else { continue }
-            hide.append(target)
-        }
+        let hide = identity.canonical(items.sorted(by: { $0.frame.minX > $1.frame.minX }).compactMap(MenuBarLayout.target(for:)))
+            .filter { sides[$0] == [.left] && coordinator.isVisible($0) }
         apply(hide: hide, show: sides.filter { $0.value == [.right] }.map(\.key))
     }
 
@@ -136,7 +135,7 @@ final class MenuBarDragging {
     /// Accessibility and only reaches icons that are on screen.
     func place(_ targets: [HideTarget], hidden: Bool) async {
         if let positionStore, var positions = positionStore.read() {
-            positions.place(Set(targets), on: hidden ? .left : .right)
+            positions.place(Set(AppIdentity.current().owners(of: targets)), on: hidden ? .left : .right)
             positionStore.write(positions)
             return
         }
@@ -144,7 +143,8 @@ final class MenuBarDragging {
         while isMoving { try? await Task.sleep(for: .milliseconds(100)) }
         isMoving = true
         let savedCursor = CGEvent(source: nil)?.location ?? .zero
-        for target in targets where coordinator.isVisible(target) && !coordinator.currentlyHidden.contains(target) {
+        let owners = AppIdentity.current().owners(of: targets.filter { coordinator.isVisible($0) && !coordinator.currentlyHidden.contains($0) })
+        for target in owners {
             // An app can have several icons. Drag them one at a time, stopping once none are left
             // on the wrong side or a drag did not reduce their number.
             var remaining = Int.max
@@ -214,5 +214,39 @@ final class MenuBarDragging {
             return location.x >= frame.minX && location.x < frame.maxX
                 && location.y <= frame.maxY && location.y >= frame.maxY - height
         }
+    }
+}
+
+/// Settings and the menu bar can name one app by different bundle IDs: its status items may be
+/// owned by helper processes that share the app's single on/off switch. Settings use one canonical
+/// ID per app; the menu bar uses the owners.
+private struct AppIdentity {
+    /// Owner bundle ID to canonical bundle ID.
+    let canonicalIDs: [String: String]
+
+    @MainActor static func current() -> AppIdentity {
+        AppIdentity(canonicalIDs: AppVisibilityBackend()?.canonicalBundleIDs() ?? [:])
+    }
+
+    func canonical(_ target: HideTarget) -> HideTarget {
+        if case .app(let id) = target, let canonical = canonicalIDs[id] { .app(bundleID: canonical) } else { target }
+    }
+
+    /// Canonical targets in order, without duplicates.
+    func canonical(_ targets: [HideTarget]) -> [HideTarget] {
+        var result: [HideTarget] = []
+        for target in targets.map(canonical) where !result.contains(target) { result.append(target) }
+        return result
+    }
+
+    func merged(_ sides: [HideTarget: Set<MenuBarSide>]) -> [HideTarget: Set<MenuBarSide>] {
+        sides.reduce(into: [:]) { result, entry in result[canonical(entry.key), default: []].formUnion(entry.value) }
+    }
+
+    /// Every owner of the given targets' apps, so all of an app's items move together.
+    func owners(of targets: [HideTarget]) -> [HideTarget] {
+        let wanted = Set(targets.map(canonical))
+        let extra = canonicalIDs.filter { wanted.contains(.app(bundleID: $0.value)) }.keys.sorted().map { HideTarget.app(bundleID: $0) }
+        return canonical(targets) + extra.filter { !wanted.contains($0) }
     }
 }

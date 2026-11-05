@@ -34,9 +34,15 @@ public struct AppVisibilityBackend: VisibilityBackend {
         readEntries() != nil
     }
 
-    /// Bundle IDs of every app macOS lists in System Settings > Menu Bar, or `nil` if unreadable.
+    /// One bundle ID for each app macOS lists in System Settings > Menu Bar, or `nil` if unreadable.
     public func trackedBundleIDs() -> [String]? {
-        readEntries().map { Array(TrackedApplications.allowedStates(in: $0).keys) }
+        canonicalBundleIDs().map { Array(Set($0.values)) }
+    }
+
+    /// Maps every bundle ID that owns status items to the one Hanare uses for its app. An app's
+    /// items can be owned by several processes that share a single on/off switch.
+    public func canonicalBundleIDs() -> [String: String]? {
+        readEntries().map(TrackedApplications.canonicalOwners)
     }
 
     public func hide(_ targets: [HideTarget]) -> Bool {
@@ -86,6 +92,16 @@ enum TrackedApplications {
             for bundleID in menuItemBundleIDs(of: entry) { states[bundleID] = allowed }
         }
         return states
+    }
+
+    static func canonicalOwners(in entries: [Any]) -> [String: String] {
+        var result: [String: String] = [:]
+        for case let entry as [String: Any] in entries where entry["isAllowed"] is Bool {
+            let owners = menuItemBundleIDs(of: entry).sorted()
+            guard let canonical = owners.first else { continue }
+            for owner in owners { result[owner] = canonical }
+        }
+        return result
     }
 
     static func settingAllowed(_ allowed: Bool, for bundleIDs: Set<String>, in entries: [Any]) -> [Any] {

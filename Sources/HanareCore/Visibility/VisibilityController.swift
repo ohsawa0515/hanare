@@ -91,8 +91,14 @@ public final class VisibilityController {
 
     /// Restores one hidden target.
     public func restore(_ target: HideTarget) {
-        guard let item = hiddenItems.first(where: { $0.target == target }) else { return }
-        restore([item])
+        restore([target])
+    }
+
+    /// Restores several hidden targets with one write per backend.
+    public func restore(_ targets: [HideTarget]) {
+        let items = hiddenItems.filter { targets.contains($0.target) }
+        guard !items.isEmpty else { return }
+        restore(items)
     }
 
     /// Restores every hidden target.

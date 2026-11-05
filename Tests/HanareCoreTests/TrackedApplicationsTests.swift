@@ -35,4 +35,14 @@ struct TrackedApplicationsTests {
         let decoded = try #require(try PropertyListSerialization.propertyList(from: data, format: nil) as? [Any])
         #expect(TrackedApplications.allowedStates(in: decoded)["com.example.line"] == false)
     }
+
+    @Test func mapsSharedOwnersToOneCanonicalID() {
+        func key(_ id: String) -> [String: Any] { ["bundle": ["_0": id]] }
+        let shared: [Any] = [
+            key("com.example.suite"),
+            ["location": key("com.example.suite"), "menuItemLocations": [key("com.example.b"), key("com.example.a")], "isAllowed": true],
+        ]
+        #expect(TrackedApplications.canonicalOwners(in: entries() + shared)["com.example.b"] == "com.example.a")
+        #expect(TrackedApplications.canonicalOwners(in: entries())["com.electron.dockerdesktop"] == "com.electron.dockerdesktop")
+    }
 }
