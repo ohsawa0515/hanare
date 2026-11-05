@@ -1,3 +1,13 @@
+<p align="center">
+  <img src="docs/logo.png" width="160" height="160" alt="Hanare logo">
+</p>
+<p align="center">
+  <a href="https://github.com/ohsawa0515/hanare/releases/latest"><img src="https://img.shields.io/badge/download-latest-brightgreen.svg" alt="download"></a>
+  <img src="https://img.shields.io/badge/platform-macOS-lightgrey.svg" alt="platform">
+  <img src="https://img.shields.io/badge/requirements-macOS%2027%2B-ff69b4.svg" alt="system requirements">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-blue.svg" alt="license"></a>
+</p>
+
 # Hanare
 
 [日本語](README.ja.md)
